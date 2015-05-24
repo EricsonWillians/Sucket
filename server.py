@@ -32,7 +32,7 @@ def main():
 
 	while True:
 		connection, address = serversocket.accept()
-		buf = connection.recv(64)
+		buf = connection.recv(64).decode()
 		if len(buf) > 0:
 			print(buf)
 			break
