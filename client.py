@@ -20,14 +20,26 @@
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 #  MA 02110-1301, USA.
 
+import socket
+
+class SucketClient():
+	
+	def __init__(self, host, port):
+		self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		self.host = host
+		self.port = port
+		
+	def __call__(self):
+		self.client.connect((self.host, self.port))
+		
+	def send(self, data):
+		self.client.send(data.encode())
+
 def main():
 	
-	import socket
-
-	clientsocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	clientsocket.connect(('localhost', 8089))
-	data = "HELLO FUCKING WORLD!! HAHAHAHHAA!!!!"
-	clientsocket.send(data.encode())
+	sk = SucketClient("localhost", 8089)
+	sk()
+	sk.send("Hello Fucking World")
 	
 	return 0
 

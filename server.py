@@ -22,16 +22,30 @@
   
 import socket
 
-def main():
+class SucketServer():
 	
-	import socket
+	def __init__(self, host, port):
+		self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		self.host = host
+		self.port = port
+	
+	def __call__(self):
+		self.server.bind((self.host, self.port))
+	
+	def listen(self, number_of_connections):
+		self.server.listen(number_of_connections)
+		
+	def accept(self):
+		return self.server.accept()
 
-	serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	serversocket.bind(('localhost', 8089))
-	serversocket.listen(5) # become a server socket, maximum 5 connections
+def main():
+
+	sk = SucketServer("localhost", 8089)
+	sk()
+	sk.listen(5)
 
 	while True:
-		connection, address = serversocket.accept()
+		connection, address = sk.accept()
 		data = connection.recv(64).decode()
 		if len(data) > 0:
 			print(data)
