@@ -63,6 +63,9 @@ def main():
 	sk.listen(number_of_connections)
 	
  	sk.start()
+ 	
+ 	# Keep the main thread up and running, so that It's possible to kill the server thread with KeyboardInterrupt.
+ 	
 	try:
 		while True:
 			time.sleep(1)
