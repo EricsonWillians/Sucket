@@ -22,16 +22,18 @@
 
 import socket
 
+port = 8080
+
 class SucketClient():
 	
-	def __init__(self, host, port):
+	def __init__(self, host):
 		self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		self.host = host
-		self.port = port
+		self.connection_established = False
 		
 	def __call__(self):
-		print('Connecting host "{0:s}" to port "{1:d}"...'.format(self.host, self.port))
-		self.client.connect((self.host, self.port))
+		print('Connecting host "{0:s}" to port "{1:d}"...'.format(self.host, port))
+		self.client.connect((self.host, port))
 		print("Connection established.")
 		
 	def send(self, data):
@@ -44,16 +46,28 @@ class SucketClient():
 		self.client.close()
 
 def main():
-	
-	sk = SucketClient("localhost", 8089)
-	sk()
-	msg = input("Input your message to the server: ")
-	sk.send(msg)
-	while True:
-		data = sk.client.recv(1000).decode()
-		if len(data) > 0:
-			print(str(data))
-			break
+
+	global port
+
+	host = input("Specify the host: ")
+	sk = SucketClient(host)
+
+	while not sk.connection_established:
+		try:
+			sk()
+			sk.connection_established = True
+		except Exception as e:
+			port += 1
+			print("Connection not established at the port {0:s}. {1:s}. Trying port {2:s}...".format(str(port-1), str(e), str(port)))
+			
+		if sk.connection_established is True:
+			msg = input("Input your message to the server: ")
+			sk.send(msg)
+			while True:
+				data = sk.client.recv(1000).decode()
+				if len(data) > 0:
+					print(str(data))
+					break
 	
 	print("Connection closed.")
 	sk.close()
