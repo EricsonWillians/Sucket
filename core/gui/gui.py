@@ -1,6 +1,9 @@
 # -*- coding:UTF-8 -*-
-from tkinter import *
+from ttk import *
+from Tkinter import *
+import ttk
 import os
+
 
 def centering(win):
 		"""

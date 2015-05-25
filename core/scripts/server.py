@@ -21,17 +21,17 @@
 #  MA 02110-1301, USA.
   
 import socket
-import platform
-
-server_host = platform.node()
-server_port = 8888
-buffer_size = 4096
 
 class SucketServer():
 	
-	def __init__(self):
+	def __init__(self, host, port):
 		self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		self.server.bind((server_host, server_port))
+		self.host = host
+		self.port = port
+	
+	def __call__(self):
+		print('Binding host "{0:s}" to port "{1:d}"...'.format(self.host, self.port))
+		self.server.bind((self.host, self.port))
 	
 	def listen(self, number_of_connections):
 		print("Listening...")
@@ -40,33 +40,24 @@ class SucketServer():
 	def accept(self):
 		return self.server.accept()
 		
-	def run(self):
-		
-		
-	#	print("Connection established with {0:s}".format(str(address)))
-	
-		while True:
-			try:			
-				connection, address = self.accept()
-				data = connection.recv(buffer_size).decode()
-				if len(data) > 0:
-					connection.send(str('You, client, said "{0:s}".'.format(data) + "\n" + "And I answer: I'm fucking fine!\n").encode())	
-			except (KeyboardInterrupt, SystemExit):
-				print("Connection closed.")
-				self.close()
-		
 	def close(self):
 		self.server.close()
 
 def main():
 
-	sk = SucketServer()
+	sk = SucketServer("localhost", 8089)
+	sk()
+	sk.listen(5)
+	connection, address = sk.accept()
+	print("Connection established with {0:s}".format(str(address)))
+	while True:
+		data = connection.recv(1000).decode()
+		if len(data) > 0:
+			connection.send(str('You, client, said "{0:s}".'.format(data) + "\n" + "And I answer: I'm fucking fine!\n").encode())
+			break
 	
-	number_of_connections = int(input("How many connections do you want to listen to?\n"))
-	sk.listen(number_of_connections)
-	
-	sk.run()
-
+	print("Connection closed.")
+	sk.close()
 	return 0
 
 if __name__ == '__main__':

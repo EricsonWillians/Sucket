@@ -21,21 +21,19 @@
 #  MA 02110-1301, USA.
 
 import socket
-import server
+
+port = 8080
 
 class SucketClient():
 	
 	def __init__(self, host):
 		self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		if host == "server_host":
-			self.host = server.server_host
-		else:
-			self.host = host
+		self.host = host
 		self.connection_established = False
 		
 	def __call__(self):
-		print('Connecting host "{0:s}" to port "{1:d}"...'.format(self.host, server.server_port))
-		self.client.connect((self.host, server.server_port))
+		print('Connecting host "{0:s}" to port "{1:d}"...'.format(self.host, port))
+		self.client.connect((self.host, port))
 		print("Connection established.")
 		
 	def send(self, data):
@@ -49,6 +47,8 @@ class SucketClient():
 
 def main():
 
+	global port
+
 	host = input("Specify the host: ")
 	sk = SucketClient(host)
 
@@ -57,13 +57,14 @@ def main():
 			sk()
 			sk.connection_established = True
 		except Exception as e:
-			print(e)
-				
+			port += 1
+			print("Connection not established at the port {0:s}. {1:s}. Trying port {2:s}...".format(str(port-1), str(e), str(port)))
+			
 		if sk.connection_established is True:
 			msg = input("Input your message to the server: ")
 			sk.send(msg)
 			while True:
-				data = sk.client.recv(server.buffer_size).decode()
+				data = sk.client.recv(1000).decode()
 				if len(data) > 0:
 					print(str(data))
 					break
