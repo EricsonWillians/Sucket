@@ -30,27 +30,34 @@ class SucketServer():
 		self.port = port
 	
 	def __call__(self):
+		print('Binding host "{0:s}" to port "{1:d}"...'.format(self.host, self.port))
 		self.server.bind((self.host, self.port))
 	
 	def listen(self, number_of_connections):
+		print("Listening...")
 		self.server.listen(number_of_connections)
 		
 	def accept(self):
 		return self.server.accept()
+		
+	def close(self):
+		self.server.close()
 
 def main():
 
 	sk = SucketServer("localhost", 8089)
 	sk()
 	sk.listen(5)
-
+	connection, address = sk.accept()
+	print("Connection established with {0:s}".format(str(address)))
 	while True:
-		connection, address = sk.accept()
-		data = connection.recv(64).decode()
+		data = connection.recv(1000).decode()
 		if len(data) > 0:
-			print(data)
+			connection.send(str('You, client, said "{0:s}".'.format(data) + "\n" + "And I answer: I'm fucking fine!\n").encode())
 			break
 	
+	print("Connection closed.")
+	sk.close()
 	return 0
 
 if __name__ == '__main__':

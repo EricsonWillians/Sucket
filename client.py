@@ -30,17 +30,33 @@ class SucketClient():
 		self.port = port
 		
 	def __call__(self):
+		print('Connecting host "{0:s}" to port "{1:d}"...'.format(self.host, self.port))
 		self.client.connect((self.host, self.port))
+		print("Connection established.")
 		
 	def send(self, data):
 		self.client.send(data.encode())
+
+	def accept(self):
+		return self.client.accept()
+
+	def close(self):
+		self.client.close()
 
 def main():
 	
 	sk = SucketClient("localhost", 8089)
 	sk()
-	sk.send("Hello Fucking World")
+	msg = input("Input your message to the server: ")
+	sk.send(msg)
+	while True:
+		data = sk.client.recv(1000).decode()
+		if len(data) > 0:
+			print(str(data))
+			break
 	
+	print("Connection closed.")
+	sk.close()
 	return 0
 
 if __name__ == '__main__':
