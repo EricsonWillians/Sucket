@@ -19,7 +19,9 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 #  MA 02110-1301, USA.
-  
+ 
+import threading
+import time
 import socket
 import platform
 
@@ -27,9 +29,10 @@ server_host = platform.node()
 server_port = 8888
 buffer_size = 4096
 
-class SucketServer():
+class SucketServer(threading.Thread):
 	
 	def __init__(self):
+		threading.Thread.__init__(self)
 		self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		self.server.bind((server_host, server_port))
 	
@@ -42,22 +45,16 @@ class SucketServer():
 		
 	def run(self):
 		
-		
 	#	print("Connection established with {0:s}".format(str(address)))
 	
 		while True:
-			try:			
 				connection, address = self.accept()
 				data = connection.recv(buffer_size).decode()
 				if len(data) > 0:
 					connection.send(str('You, client, said "{0:s}".'.format(data) + "\n" + "And I answer: I'm fucking fine!\n").encode())	
-			except (KeyboardInterrupt, SystemExit):
-				print("Connection closed.")
-				self.close() 
-		
-	def close(self):
-		self.server.close()
-
+				elif data == '':
+					break
+						
 def main():
 
 	sk = SucketServer()
@@ -65,8 +62,15 @@ def main():
 	number_of_connections = int(input("How many connections do you want to listen to?\n"))
 	sk.listen(number_of_connections)
 	
-	sk.run()
-
+ 	sk.start()
+	try:
+		while True:
+			time.sleep(1)
+	except KeyboardInterrupt:
+		print("Connection closed.")
+		sk.server.close()
+		sk.running = False 
+		
 	return 0
 
 if __name__ == '__main__':
